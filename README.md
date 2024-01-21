@@ -6,8 +6,8 @@ This project aims to predict the gap between arterial oxygen saturation (SaO2) a
 ## Databases
 The project utilizes two critical care databases:
 
-### MIMIC-IV: A large database comprising de-identified health-related data associated with over forty thousand patients who stayed in critical care units of the Beth Israel Deaconess Medical Center between 2001 and 2012.
-### eICU: A multi-center database comprising over 200,000 admissions to intensive care units across the United States between 2014 and 2015.
+- MIMIC-IV: A large database comprising de-identified health-related data associated with over forty thousand patients who stayed in critical care units of the Beth Israel Deaconess Medical Center between 2001 and 2012.
+- eICU: A multi-center database comprising over 200,000 admissions to intensive care units across the United States between 2014 and 2015.
 
 ## Repository Structure
 ```
