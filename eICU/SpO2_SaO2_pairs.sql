@@ -23,7 +23,7 @@ WITH pairs AS (
   )
   AS spo2_table
   ON spo2_table.patientunitstayid = sao2_table.patientunitstayid
-  -- each ABG-measured sao2_table is matched with the closest SpO2 value recorded within the previous 90 minutes"
+  -- each ABG-measured sao2_table is matched with the closest SpO2 value recorded within the previous 5 minutes"
   AND sao2_table.labresultoffset - spo2_table.observationoffset <= 5
   AND sao2_table.labresultoffset - spo2_table.observationoffset >= 0
 
