@@ -11,10 +11,10 @@ SELECT
     WHEN patient.gender = "Male" THEN 0
     ELSE NULL
   END AS sex_female
-, patient.admissionWeight AS weight
-, patient.admissionHeight AS height
+, patient.admissionweight AS weight
+, patient.admissionheight AS height
 , CASE
-    WHEN patient.admissionHeight > 0.1 THEN patient.admissionWeight / (POWER(patient.admissionHeight/100, 2))
+    WHEN patient.admissionheight > 0.1 THEN patient.admissionweight / (POWER(patient.admissionheight/100, 2))
     ELSE NULL
   END AS BMI
 , CASE
@@ -29,13 +29,14 @@ SELECT
     WHEN patient.ethnicity = "Asian" THEN "Asian"
     ELSE "Other"
   END AS race_group
-, patient.hospitalAdmitOffset
-, patient.unitDischargeOffset
-, patient.hospitalDischargeOffset
-, CAST(CEILING( (patient.hospitalDischargeOffset - patient.hospitalAdmitOffset) / 60 / 24 ) AS INT64) AS los_hospital
-, (patient.unitDischargeOffset / 60 / 24) AS los_icu
+, patient.hospitaladmitoffset
+, patient.unitdischargeoffset
+, patient.hospitaldischargeoffset
+  -- from minutes to days
+, CAST(CEILING( (patient.hospitaldischargeoffset - patient.hospitaladmitoffset) / 60 / 24 ) AS INT64) AS los_hospital
+, (patient.unitdischargeoffset / 60 / 24) AS los_icu
 , CASE
-    WHEN patient.hospitalDischargeStatus = "Expired" THEN 1
+    WHEN patient.hospitaldischargestatus = "Expired" THEN 1
     ELSE 0
   END AS mortality_in
 FROM `datathon2023-team4.eicu_crd_us.patient`
