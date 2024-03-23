@@ -57,16 +57,23 @@ bg AS (
   ORDER BY patientunitstayid, SaO2_timestamp
 )
 , vt AS (
-  
   SELECT patientunitstayid, airwaytype, ventstartoffset AS offset, 'start' AS event
   FROM `datathon2023-team4.eicu_crd_us.respiratorycare`
   WHERE ventstartoffset != 0
 
   UNION ALL
 
+  -- invasiveventに関連する情報がある行を選択
+  -- ventstartoffset < respcarestatusoffset なのでこちらが優先される
   SELECT patientunitstayid, airwaytype, respcarestatusoffset AS offset, 'start' AS event
   FROM `datathon2023-team4.eicu_crd_us.respiratorycare`
-  WHERE ventstartoffset != 0 AND airwaytype != ""
+  WHERE ventstartoffset != 0
+  AND ventendoffset = 0
+  AND airwaytype in ('Oral ETT',
+                     'Nasal ETT',
+                     'Tracheostomy',
+                     'Cricothyrotomy',
+                     'Double-Lumen Tube')
   
   UNION ALL
   
@@ -85,8 +92,11 @@ bg AS (
   SELECT patientunitstayid, airwaytype, priorventendoffset AS offset, 'end' AS event
   FROM `datathon2023-team4.eicu_crd_us.respiratorycare`
   WHERE priorventendoffset != 0
-
-  ORDER BY patientunitstayid, offset, airwaytype DESC
+)
+, vt_unique AS (
+   SELECT patientunitstayid, offset, any_value(airwaytype) as airwaytype, event
+   FROM vt
+   GROUP BY patientunitstayid, offset, event
 )
 , vent AS (
   SELECT * FROM
@@ -109,7 +119,7 @@ bg AS (
       END AS ventilation_active
     FROM `datathon2023-team4.eicu_crd_pulseOx_us.SaO2_SpO2_pairs` pairs
   
-    LEFT JOIN vt AS vent
+    LEFT JOIN vt_unique AS vent
     ON pairs.patientunitstayid = vent.patientunitstayid
     AND vent.offset <= pairs.SaO2_timestamp -- only looking at past values
   )
@@ -172,10 +182,11 @@ SELECT
 , vent.ventilation_status
 
 , CASE
-    WHEN (vent.ventilation_status = "Tracheostomy"
-          OR vent.ventilation_status = "Cricothyrotomy"
-          OR vent.ventilation_status = "Double-Lumen Tube"
-    )
+    WHEN vent.ventilation_status in ('Oral ETT',
+                                      'Nasal ETT',
+                                      'Tracheostomy',
+                                      'Cricothyrotomy',
+                                      'Double-Lumen Tube')
     THEN 1
     ELSE 0
   END AS invasive_vent
